@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Price Comparison</title>
+    <style>
+        /* Theme Variables */
+        :root {
+            --primary: #ea4335;
+            --secondary: #fbbc05;
+            --text: #333;
+            --light: #f8f9fa;
+            --border: #ddd;
+            --error: #4285f4;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --input-bg: #ffffff;
+            --table-row-odd: #f8f9fa;
+            --shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .dark-mode {
+            --primary: #ff6b5b;
+            --secondary: #ffd35c;
+            --text: #e8eaed;
+            --light: #202124;
+            --border: #5f6368;
+            --error: #8ab4f8;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e8eaed;
+            --input-bg: #2d2d2d;
+            --table-row-odd: #2d2d2d;
+            --shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        #product_name {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        #search_button {
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #search_button:hover {
+            background: #d33426;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        #search_button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .price-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .price-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.3s ease;
+        }
+
+        .price-table tr:nth-child(even) {
+            background: var(--table-row-odd);
+        }
+
+        .price-table tr:hover {
+            background: var(--light);
+        }
+
+        .best-price {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .error {
+            color: var(--error);
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 500;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 5px;
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text);
+            font-style: italic;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .product-link {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .product-link:hover {
+            text-decoration: underline;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 30px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .chart-container h3 {
+            margin-top: 0;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        /* Theme Toggle Styles */
+        .theme-toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            font-size: 14px;
+            position: absolute;
+            left: 8px;
+            top: 5px;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        /* New Features */
+        .recent-searches {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .recent-searches h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .search-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-tag {
+            background: var(--light);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-tag:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Fashion-specific enhancements */
+        .fashion-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .fashion-category {
+            padding: 8px 15px;
+            background: var(--light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .fashion-category:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            #search_button {
+                width: 100%;
+            }
+            
+            .chart-container {
+                padding: 15px;
+            }
+            
+            #priceChart {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="theme-toggle-container">
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <h1>👗 Fashion Price Comparison</h1>
+        <p class="subtitle">Compare prices across Myntra, Ajio, and Tira</p>
+        
+        <div class="search-box">
+            <input type="text" id="product_name" placeholder="Search for clothing, shoes, accessories, etc." autocomplete="off">
+            <button id="search_button" onclick="searchProduct()">Search Prices</button>
+        </div>
+        
+        <div class="fashion-categories">
+            <div class="fashion-category" onclick="setSearchTerm('Men T-Shirts')">Men T-Shirts</div>
+            <div class="fashion-category" onclick="setSearchTerm('Women Dresses')">Women Dresses</div>
+            <div class="fashion-category" onclick="setSearchTerm('Running Shoes')">Running Shoes</div>
+            <div class="fashion-category" onclick="setSearchTerm('Handbags')">Handbags</div>
+            <div class="fashion-category" onclick="setSearchTerm('Watches')">Watches</div>
+        </div>
+        
+        <div class="recent-searches" id="recent_searches">
+            <h3>Recent Searches</h3>
+            <div class="search-tags" id="search_tags">
+                <!-- Recent searches will appear here -->
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Searching for prices...</p>
+        </div>
+        
+        <div class="error" id="error_message"></div>
+        
+        <div class="results" id="results">
+            <h2 id="results_title">Prices for <span id="product_title"></span></h2>
+            
+            <table class="price-table" id="price_table">
+                <thead>
+                    <tr>
+                        <th>Store</th>
+                        <th>Price (₹)</th>
+                        <th>Product Link</th>
+                    </tr>
+                </thead>
+                <tbody id="prices_table_body">
+                    <!-- Prices will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="no-results" id="no_results">
+                No prices found for this product. Try a different search term.
+            </div>
+        </div>
+        
+        <div class="chart-container" id="chart_container">
+            <h3>Price Comparison Chart</h3>
+            <canvas id="priceChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let priceChart = null;
+        let recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+        
+        // Initialize theme
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            updateRecentSearchesUI();
+        });
+        
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const currentTheme = localStorage.getItem('theme') || 
+                                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+            }
+            
+            themeToggle.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
+        
+        function setSearchTerm(term) {
+            document.getElementById('product_name').value = term;
+            searchProduct();
+        }
+        
+        function updateRecentSearchesUI() {
+            const container = document.getElementById('search_tags');
+            container.innerHTML = '';
+            
+            if (recentSearches.length > 0) {
+                document.getElementById('recent_searches').style.display = 'block';
+                
+                recentSearches.slice(0, 5).forEach(search => {
+                    const tag = document.createElement('div');
+                    tag.className = 'search-tag';
+                    tag.textContent = search;
+                    tag.onclick = () => {
+                        document.getElementById('product_name').value = search;
+                        searchProduct();
+                    };
+                    container.appendChild(tag);
+                });
+            } else {
+                document.getElementById('recent_searches').style.display = 'none';
+            }
+        }
+        
+        function addToRecentSearches(searchTerm) {
+            // Remove if already exists
+            recentSearches = recentSearches.filter(item => item.toLowerCase() !== searchTerm.toLowerCase());
+            
+            // Add to beginning
+            recentSearches.unshift(searchTerm);
+            
+            // Keep only last 5 searches
+            if (recentSearches.length > 5) {
+                recentSearches = recentSearches.slice(0, 5);
+            }
+            
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            updateRecentSearchesUI();
+        }
+        
+        async function searchProduct() {
+            const productName = document.getElementById('product_name').value.trim();
+            if (!productName) {
+                showError("Please enter a product name");
+                return;
+            }
+            
+            // Add to recent searches
+            addToRecentSearches(productName);
+            
+            // Reset previous results
+            document.getElementById('prices_table_body').innerHTML = '';
+            document.getElementById('error_message').style.display = 'none';
+            document.getElementById('no_results').style.display = 'none';
+            document.getElementById('chart_container').style.display = 'none';
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('search_button').disabled = true;
+            
+            try {
+                // Fetch prices
+                const priceResponse = await fetch(`/search/fashion?q=${encodeURIComponent(productName)}`);
+                
+                if (!priceResponse.ok) {
+                    const errorData = await priceResponse.json();
+                    throw new Error(errorData.error || "Failed to fetch prices");
+                }
+                
+                const prices = await priceResponse.json();
+                
+                if (Object.keys(prices).length === 0) {
+                    throw new Error("No prices found for this product");
+                }
+                
+                displayResults(productName, prices);
+                await generateChart(productName);
+                
+            } catch (error) {
+                showError(error.message);
+                document.getElementById('no_results').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('search_button').disabled = false;
+                document.getElementById('results').style.display = 'block';
+            }
+        }
+        
+        function displayResults(productName, prices) {
+            const tableBody = document.getElementById('prices_table_body');
+            tableBody.innerHTML = '';
+            
+            document.getElementById('product_title').textContent = productName;
+            
+            let allPrices = [];
+            let hasResults = false;
+            
+            for (const [store, storeProducts] of Object.entries(prices)) {
+                if (storeProducts && storeProducts.length > 0) {
+                    hasResults = true;
+                    
+                    storeProducts.forEach(product => {
+                        const row = document.createElement('tr');
+                        
+                        // Store cell
+                        const storeCell = document.createElement('td');
+                        storeCell.textContent = store;
+                        row.appendChild(storeCell);
+                        
+                        // Price cell
+                        const priceCell = document.createElement('td');
+                        priceCell.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+                        row.appendChild(priceCell);
+                        
+                        // Link cell
+                        const linkCell = document.createElement('td');
+                        if (product.link) {
+                            linkCell.innerHTML = `
+                                <a href="${product.link}" class="product-link" target="_blank" rel="noopener noreferrer">
+                                    View Product
+                                </a>
+                            `;
+                        } else {
+                            linkCell.textContent = "Link not available";
+                        }
+                        row.appendChild(linkCell);
+                        
+                        tableBody.appendChild(row);
+                        allPrices.push(product.price);
+                    });
+                }
+            }
+            
+            // Highlight best price
+            if (allPrices.length > 0) {
+                const minPrice = Math.min(...allPrices);
+                document.querySelectorAll('#prices_table_body td:nth-child(2)').forEach(cell => {
+                    if (parseFloat(cell.textContent.replace(/[^0-9.]/g, '')) === minPrice) {
+                        cell.classList.add('best-price');
+                    }
+                });
+            }
+        }
+        
+        async function generateChart(productName) {
+            try {
+                const response = await fetch(`/chart/fashion?q=${encodeURIComponent(productName)}`);
+                
+                if (!response.ok) {
+                    throw new Error("Failed to generate chart data");
+                }
+                
+                const chartData = await response.json();
+                
+                const ctx = document.getElementById('priceChart').getContext('2d');
+                
+                // Destroy previous chart if exists
+                if (priceChart) {
+                    priceChart.destroy();
+                }
+                
+                priceChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Average Price (₹)',
+                            data: chartData.datasets[0].data,
+                            backgroundColor: [
+                                'rgba(234, 67, 53, 0.7)',
+                                'rgba(251, 188, 5, 0.7)',
+                                'rgba(66, 133, 244, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(234, 67, 53, 1)',
+                                'rgba(251, 188, 5, 1)',
+                                'rgba(66, 133, 244, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString('en-IN');
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Price: ₹' + context.raw.toLocaleString('en-IN');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                document.getElementById('chart_container').style.display = 'block';
+            } catch (error) {
+                console.error("Chart generation error:", error);
+            }
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('error_message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        // Search on Enter key
+        document.getElementById('product_name').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProduct();
+            }
+        });
+    </script>
+</body>
+</html>

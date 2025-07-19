@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Price Comparison</title>
+    <style>
+        /* Theme Variables */
+        :root {
+            --primary: #FF9933;
+            --secondary: #138808;
+            --text: #333;
+            --light: #f8f9fa;
+            --border: #ddd;
+            --error: #ea4335;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --input-bg: #ffffff;
+            --table-row-odd: #f8f9fa;
+        }
+
+        .dark-mode {
+            --primary: #FFB366;
+            --secondary: #4CAF50;
+            --text: #e8eaed;
+            --light: #202124;
+            --border: #5f6368;
+            --error: #f28b82;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e8eaed;
+            --input-bg: #2d2d2d;
+            --table-row-odd: #2d2d2d;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 40px;
+        }
+
+        .category-cards {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .category-card {
+            width: 300px;
+            padding: 30px;
+            border-radius: 10px;
+            background: var(--card-bg);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .category-card.electronics {
+            border-top: 5px solid var(--primary);
+        }
+
+        .category-card.fashion {
+            border-top: 5px solid var(--error);
+        }
+
+        .category-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .category-desc {
+            color: var(--text);
+        }
+
+        /* Theme Toggle Styles */
+        .theme-toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            font-size: 14px;
+            position: absolute;
+            left: 8px;
+            top: 5px;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        @media (max-width: 768px) {
+            .category-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .container {
+                margin: 20px auto;
+                padding: 20px;
+            }
+            
+            .category-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="theme-toggle-container">
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <h1>Indian Price Comparison</h1>
+        <p>Compare prices across India's top e-commerce websites</p>
+        
+        <div class="category-cards">
+            <a href="/electronics" class="category-card electronics">
+                <div class="category-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <h2 class="category-title">Electronics</h2>
+                <p class="category-desc">Compare prices for mobiles, laptops, gadgets and more</p>
+            </a>
+            
+            <a href="/fashion" class="category-card fashion">
+                <div class="category-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <h2 class="category-title">Fashion</h2>
+                <p class="category-desc">Compare prices for clothing, shoes, accessories and more</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Check for saved theme preference or use preferred color scheme
+            const currentTheme = localStorage.getItem('theme') || 
+                                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            // Apply the saved theme
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+            }
+
+            // Theme toggle event listener
+            themeToggle.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // Watch for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.body.classList.toggle('dark-mode', newTheme === 'dark');
+                themeToggle.checked = (newTheme === 'dark');
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+</body>
+</html>
